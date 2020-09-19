@@ -1,5 +1,5 @@
 import random
-
+from functools import reduce
 
 CARDS = {}
 
@@ -17,11 +17,22 @@ def take_response():
     print("Choose correct menu item.")
 
 
+def luhn(code):
+    LOOKUP = (0, 2, 4, 6, 8, 1, 3, 5, 7, 9)
+    code = reduce(str.__add__, filter(str.isdigit, code))
+    evens = sum(int(i) for i in code[-1::-2])
+    odds = sum(LOOKUP[int(i)] for i in code[-2::-2])
+    return (evens + odds) % 10 == 0
+
+
 def create_card():
     BIN = "400000"
-    AI = str(random.randint(100000000, 999999999))
     checksum = "2"
+    AI = str(random.randint(100000000, 999999999))
     card_number = BIN + AI + checksum
+    while not luhn(card_number):
+        AI = str(random.randint(100000000, 999999999))
+        card_number = BIN + AI + checksum
     card_pin = str(random.randint(1000, 9999))
     CARDS[card_number] = card_pin
     return card_number, card_pin
@@ -61,11 +72,12 @@ def login_account():
                 elif response == "0":
                     print("\nBye!")
                     exit(1)
+                elif response == "2":
+                    print("You have successfully logged out!")
         else:
             print("\nWrong card number or PIN!")
     except KeyError:
         print("\nWrong card number or PIN!")
-
 
 
 def main():
