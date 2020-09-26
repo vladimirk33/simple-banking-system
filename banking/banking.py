@@ -1,7 +1,22 @@
+import sqlite3
 import random
 from functools import reduce
 
+conn = sqlite3.connect("card.s3db")
+cur = conn.cursor()
 CARDS = {}
+
+
+def create_db():
+    cur.execute("""CREATE TABLE IF NOT EXISTS card (
+                         id INTEGER PRIMARY KEY AUTOINCREMENT,
+                         number TEXT,
+                         pin TEXT,
+                         balance INTEGER DEFAULT 0
+                        );""")
+    # for row in cur.execute('SELECT * FROM card'):
+    #    print(row)
+    conn.commit()
 
 
 def menu():
@@ -33,7 +48,15 @@ def create_card():
     while not luhn(card_number):
         AI = str(random.randint(100000000, 999999999))
         card_number = BIN + AI + checksum
+    card_numbers = cur.execute("SELECT number FROM card").fetchall()
+    if card_number in (i[0] for i in card_numbers):
+        create_card()
     card_pin = str(random.randint(1000, 9999))
+    # card_id = len(cur.execute("SELECT * FROM card").fetchall())
+    cur.execute("INSERT INTO card VALUES (?, ?, ?, ?)", (None, card_number, card_pin, 0))
+    conn.commit()
+    # for row in cur.execute('SELECT * FROM card'):
+    #    print(row)
     CARDS[card_number] = card_pin
     return card_number, card_pin
 
@@ -48,7 +71,7 @@ def create_account():
 
 def account_menu():
     print("""\n1. Balance
-2. Log out
+2. Log out0
 0. Exit""")
 
 
@@ -93,4 +116,5 @@ def main():
 
 
 if __name__ == "__main__":
+    create_db()
     main()
