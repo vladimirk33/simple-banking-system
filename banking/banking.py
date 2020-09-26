@@ -105,7 +105,10 @@ def do_transfer(card_number):
     print("\nTransfer")
     other_card = input("Enter card number:\n> ")
     card_numbers = cur.execute("SELECT number FROM card").fetchall()
-    if other_card not in (i[0] for i in card_numbers):
+    if not luhn(other_card):
+        print("Probably you made a mistake in the card number. Please try again!")
+        return
+    elif other_card not in (i[0] for i in card_numbers):
         print("Such a card does not exist.")
         return
     transfer_money = int(input("Enter how much money you want to transfer:\n> "))
